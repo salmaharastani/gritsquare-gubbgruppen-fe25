@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 import { getDatabase, ref, set, push, get } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 import { censorBadWords } from "./censor.js";
 import { setupDragAndDelete } from "./dragdelete.js";
@@ -112,15 +112,18 @@ export function displayAllUsers(users) {
 // Event listener för knappen 
 const postBtn = document.getElementById("postBtn");
 const usernameInput = document.getElementById("usernameInput");
+const usernameCol = document.getElementById("usernameCol");
 const messageInput = document.getElementById("messageInput");
 
 postBtn.addEventListener("click", async () => {
+  const currentUser = auth.currentUser;
+  const rawName = currentUser ? currentUser.displayName : usernameInput.value.trim();
   // Censurera namn och meddelande innan vi skickar
-  const censoredName = censorBadWords(usernameInput.value.trim());
+  const censoredName = censorBadWords(rawName);
   const censoredMessage = censorBadWords(messageInput.value.trim());
 
   const userObj = {
-    owner: auth.currentUser ? auth.currentUser.uid : "anonymous",
+    owner: currentUser ? currentUser.uid : "anonymous",
     name: censoredName,      // censurerat namn
     message: censoredMessage // censurerat meddelande
   }; 
@@ -137,7 +140,7 @@ postBtn.addEventListener("click", async () => {
     displayAllUsers(users);
 
     // Töm inputfält
-    usernameInput.value = "";
+    if (!currentUser) usernameInput.value = "";
     messageInput.value = "";
   } else {
     alert("Failed to post message, please try again");
@@ -156,31 +159,49 @@ postBtn.addEventListener("click", async () => {
 
 // Logga in med google genom firebase / Henrik
 
+const loginBtn = document.getElementById("loginBtn");
+const loginItem = document.getElementById("loginItem");
+const logoutBtn = document.getElementById("logoutBtn");
+const logoutItem = document.getElementById("logoutItem");
+const signedInItem = document.getElementById("signedInItem");
+const signedInLabel = document.getElementById("signedInLabel");
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    const uid = user.uid;
-    console.log("User is signed in with UID:", uid);
+    console.log("User is signed in:", user.displayName);
+    if (loginItem) loginItem.style.display = "none";
+    if (signedInItem) signedInItem.style.display = "flex";
+    if (signedInLabel) signedInLabel.textContent = "Signed in as " + (user.displayName || user.email);
+    if (logoutItem) logoutItem.style.display = "";
+    if (usernameCol) usernameCol.style.display = "none";
   } else {
     console.log("No user is signed in");
+    if (loginItem) loginItem.style.display = "";
+    if (signedInItem) signedInItem.style.display = "none";
+    if (logoutItem) logoutItem.style.display = "none";
+    if (usernameCol) usernameCol.style.display = "";
   }
 });
 
-signInWithPopup(auth, new GoogleAuthProvider());
+if (loginBtn) {
+  loginBtn.addEventListener("click", () => {
+    signInWithPopup(auth, new GoogleAuthProvider())
+      .then((result) => {
+        console.log("User signed in:", result.user.displayName);
+      })
+      .catch((error) => {
+        console.error("Error signing in:", error);
+      });
+  });
+}
 
-
-// Event listener för login-knappen, den finns inte ännu i HTML
-const loginBtn = document.getElementById("loginBtn");
-loginBtn.addEventListener("click", () => {
-  signInWithPopup(auth, new GoogleAuthProvider())
-    .then((result) => {
-      const user = result.user;
-      console.log("User signed in:", user);
-    })
-    .catch((error) => {
-      console.error("Error signing in:", error);
-    });
-});
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth)
+      .then(() => console.log("User signed out"))
+      .catch((error) => console.error("Error signing out:", error));
+  });
+}
 
 
 
