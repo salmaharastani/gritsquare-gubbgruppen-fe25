@@ -109,8 +109,10 @@ export function displayAllUsers(users) {
 }
 
 
+// Event listener för knappen 
 const postBtn = document.getElementById("postBtn");
 const usernameInput = document.getElementById("usernameInput");
+const usernameCol = document.getElementById("usernameCol");
 const messageInput = document.getElementById("messageInput");
 
 postBtn.addEventListener("click", async (e) => {
@@ -121,9 +123,9 @@ postBtn.addEventListener("click", async (e) => {
   const censoredMessage = censorBadWords(messageInput.value.trim());
 
   const userObj = {
-    owner: auth.currentUser ? auth.currentUser.uid : "anonymous",
-    name: censoredName,
-    message: censoredMessage
+    owner: currentUser ? currentUser.uid : "anonymous",
+    name: censoredName,      // censurerat namn
+    message: censoredMessage // censurerat meddelande
   }; 
 
   if (!userObj.name || !userObj.message) {
@@ -142,7 +144,7 @@ postBtn.addEventListener("click", async (e) => {
     audio.play().catch(err => console.warn("Audio playback failed:", err));
 
     // Töm inputfält
-    usernameInput.value = "";
+    if (!currentUser) usernameInput.value = "";
     messageInput.value = "";
   } else {
     alert("Failed to post message, please try again");
@@ -161,45 +163,49 @@ postBtn.addEventListener("click", async (e) => {
 
 // Logga in med google genom firebase / Henrik
 
-
 const loginBtn = document.getElementById("loginBtn");
+const loginItem = document.getElementById("loginItem");
 const logoutBtn = document.getElementById("logoutBtn");
 const logoutItem = document.getElementById("logoutItem");
+const signedInItem = document.getElementById("signedInItem");
+const signedInLabel = document.getElementById("signedInLabel");
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    loginBtn.textContent = `Signed in as ${user.displayName || user.email}`;
-    loginBtn.disabled = true;
-    logoutItem.style.display = "";
-    usernameInput.value = user.displayName || user.email;
-    usernameInput.closest(".col-12.col-md-3").style.display = "none";
+    console.log("User is signed in:", user.displayName);
+    if (loginItem) loginItem.style.display = "none";
+    if (signedInItem) signedInItem.style.display = "flex";
+    if (signedInLabel) signedInLabel.textContent = "Signed in as " + (user.displayName || user.email);
+    if (logoutItem) logoutItem.style.display = "";
+    if (usernameCol) usernameCol.style.display = "none";
   } else {
-    loginBtn.textContent = "Sign in with Google";
-    loginBtn.disabled = false;
-    logoutItem.style.display = "none";
-    usernameInput.value = "";
-    usernameInput.closest(".col-12.col-md-3").style.display = "";
+    console.log("No user is signed in");
+    if (loginItem) loginItem.style.display = "";
+    if (signedInItem) signedInItem.style.display = "none";
+    if (logoutItem) logoutItem.style.display = "none";
+    if (usernameCol) usernameCol.style.display = "";
   }
 });
 
-logoutBtn.addEventListener("click", () => {
-  signOut(auth).catch((error) => console.error("Sign-out error:", error));
-});
+if (loginBtn) {
+  loginBtn.addEventListener("click", () => {
+    signInWithPopup(auth, new GoogleAuthProvider())
+      .then((result) => {
+        console.log("User signed in:", result.user.displayName);
+      })
+      .catch((error) => {
+        console.error("Error signing in:", error);
+      });
+  });
+}
 
-loginBtn.addEventListener("click", () => {
-  signInWithPopup(auth, new GoogleAuthProvider())
-    .then((result) => {
-      console.log("User signed in:", result.user);
-    })
-    .catch((error) => {
-      console.error("Error signing in:", error);
-      if (error.code === "auth/unauthorized-domain") {
-        alert("Sign-in failed: this domain is not authorized in Firebase.\nOpen the app via a local server (e.g. Live Server) instead of opening the file directly.");
-      } else {
-        alert(`Sign-in failed: ${error.message}`);
-      }
-    });
-});
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth)
+      .then(() => console.log("User signed out"))
+      .catch((error) => console.error("Error signing out:", error));
+  });
+}
 
 
 
