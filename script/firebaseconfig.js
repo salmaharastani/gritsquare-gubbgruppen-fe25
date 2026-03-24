@@ -145,7 +145,6 @@ postBtn.addEventListener("click", async (e) => {
     message: censoredMessage,
     createdAt: Date.now(),
   };
-  console.log(user);
 
   if (!userObj.name || !userObj.message) {
     alert("Please enter both username and message!");
