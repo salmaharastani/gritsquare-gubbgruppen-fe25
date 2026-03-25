@@ -30,7 +30,9 @@ export function setupPostForm({ displayAllUsers }) {
       displayAllUsers(users);
       const audio = new Audio("./pop.mp3");
       audio.play().catch((err) => console.warn("Audio playback failed:", err));
-      usernameInput.value = "";
+      if (!window.currentUserId) {
+        usernameInput.value = "";
+      }
       messageInput.value = "";
     } else {
       alert("Failed to post message, please try again");
