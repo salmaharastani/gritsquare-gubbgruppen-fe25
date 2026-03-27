@@ -27,34 +27,13 @@ HTML, CSS, JavaScript, Firebase
 
 ## Utvecklingslogg
 
-### 2026-03-17
-Projektet startades, roller delades upp och backend sattes upp.
-
-### 2026-03-18
-Andra mötet.  
-Första skiss gjordes.  
-Bas HTML-struktur färdig.  
-Grundläggande meddelandefunktion implementerad.  
+Första skiss
 
 ![First sketch](skiss-gubbchat.jpg)
 
-### 2026-03-19
-Delete-funktion tillagd (Mohammad)  
-Profanity filter tillagt (Mohammad)  
-Timestamps testades men inte klara  
+Mockup  
 
-### 2026-03-20
-Google login implementerat (Henrik)  
-Dark/light mode (Adam)  
-Drag/delete (Mohammad)  
-
-### 2026-03-21
-Ljud vid nya meddelanden (Mohammad)  
-
-### 2026-03-24
-Timestamps implementerade (Bella)  
-Sortering efter tid/användare (Bella)  
-Timestamp visas vid hover (Eddie)  
+![Mockup](https://github.com/Dunderblixt/gritsquare-gubbgruppen-fe25/blob/main/Mockup%20Gubbchat.jpg)
 
 ## Demo
 https://dunderblixt.github.io/gritsquare-gubbgruppen-fe25/
